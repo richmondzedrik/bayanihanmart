@@ -11,7 +11,7 @@ const routes = [
     path: '/',
     name: 'Home',
     component: Home,
-    meta: { requiresAuth: true }
+    meta: { requiresAuth: false }
   },
   {
     path: '/login',
@@ -34,6 +34,16 @@ const routes = [
     name: 'BuyerMarketplace',
     component: () => import('../views/buyer/MarketplaceView.vue'),
     meta: { requiresAuth: true, role: 'buyer' }
+  },
+  {
+    path: '/about',
+    name: 'About',
+    component: () => import('../views/AboutView.vue')
+  },
+  {
+    path: '/contact',
+    name: 'Contact',
+    component: () => import('../views/ContactView.vue')
   }
 ]
 
@@ -70,6 +80,9 @@ router.beforeEach((to, from, next) => {
       next(authStore.user?.role === 'seller' ? '/seller/dashboard' : '/buyer/marketplace');
     } else if (to.path === '/login' && authStore.user) {
       next(authStore.user.role === 'seller' ? '/seller/dashboard' : '/buyer/marketplace');
+    } else if (to.path === '/' && authStore.user) {
+      // Allow authenticated users to access home page
+      next();
     } else {
       next();
     }

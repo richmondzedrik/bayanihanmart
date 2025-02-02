@@ -52,9 +52,11 @@
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAuthStore } from '@/stores/auth';
+import { useNotificationStore } from '@/stores/notification';
 
 const router = useRouter();
 const authStore = useAuthStore();
+const notificationStore = useNotificationStore();
 
 const email = ref('');
 const password = ref('');
@@ -71,8 +73,25 @@ const handleSubmit = async () => {
     if (!userRole) {
       throw new Error('User role not found');
     }
+    
+    // Add success notification
+    notificationStore.addNotification({
+      title: 'Welcome back!',
+      message: 'You have successfully logged in.',
+      type: 'success',
+      duration: 5000
+    });
+    
     router.push(userRole === 'seller' ? '/seller/dashboard' : '/buyer/marketplace');
   } catch (e) {
+    // Add error notification
+    notificationStore.addNotification({
+      title: 'Login Failed',
+      message: e.message || 'Failed to login',
+      type: 'error',
+      duration: 5000
+    });
+    
     if (e.code === 'auth/network-request-failed') {
       error.value = 'Unable to connect to the server. Please check your internet connection and try again.';
     } else if (e.code === 'auth/invalid-credential') {

@@ -1,13 +1,15 @@
 <script setup>
 import { useAuthStore } from '@/stores/auth';
 import Navbar from '@/components/shared/Navbar.vue';
+import NotificationToast from '@/components/shared/NotificationToast.vue';
 
 const authStore = useAuthStore();
 </script>
 
 <template>
   <div class="min-h-screen bg-gray-100">
-    <Navbar v-if="authStore.user" />
+    <Navbar />
+    <NotificationToast />
     <router-view></router-view>
   </div>
 </template>
