@@ -7,7 +7,8 @@ import {
   signOut,
   signInWithPopup,
   GoogleAuthProvider,
-  onAuthStateChanged
+  onAuthStateChanged,
+  sendEmailVerification
 } from 'firebase/auth';
 import { doc, setDoc, getDoc } from 'firebase/firestore';
 import { db } from '@/services/firebase/config';
@@ -114,6 +115,9 @@ export const useAuthStore = defineStore('auth', () => {
               ...userDoc.data()
             };
           }
+          if (!user.value.emailVerified) {
+            throw new Error('Please verify your email before logging in');
+          }
           return user.value;
         } catch (e) {
           if (e.code === 'auth/network-request-failed' && retries > 1) {
@@ -142,10 +146,12 @@ export const useAuthStore = defineStore('auth', () => {
         ...userData,
         uid: firebaseUser.uid,
         email: firebaseUser.email,
-        createdAt: new Date()
+        emailVerified: firebaseUser.emailVerified,
+        createdAt: new Date().toISOString()
       };
       await setDoc(doc(db, 'users', firebaseUser.uid), userDocData);
       user.value = userDocData;
+      await sendEmailVerification(firebaseUser);
       return user.value;
     } catch (e) {
       error.value = e.message;

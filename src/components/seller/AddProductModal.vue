@@ -67,13 +67,26 @@ const productData = ref({
 
 const handleSubmit = async () => {
   try {
-    await productStore.createProduct({
+    const productWithSeller = {
       ...productData.value,
       price: Number(productData.value.price),
-      stock: Number(productData.value.stock)
-    });
+      stock: Number(productData.value.stock),
+      sellerId: authStore.user.uid,
+      createdAt: new Date()
+    };
+    
+    await productStore.createProduct(productWithSeller);
     emit('product-added');
     emit('close');
+    
+    // Reset form
+    productData.value = {
+      name: '',
+      description: '',
+      price: '',
+      stock: '',
+      sellerId: authStore.user?.uid
+    };
   } catch (error) {
     console.error('Error adding product:', error);
   }

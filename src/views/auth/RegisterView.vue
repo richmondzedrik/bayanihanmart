@@ -1,67 +1,106 @@
 <template>
-  <div class="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-    <div class="max-w-md w-full space-y-8">
-      <div>
-        <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">Create your account</h2>
+  <div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-50 via-white to-purple-50 py-12 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-md w-full">
+      <!-- Title -->
+      <div class="text-center">
+        <h2 class="text-3xl font-extrabold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent mb-2">
+          Create Account
+        </h2>
+        <p class="text-gray-600 text-sm mb-8">Join BayanihanMart community today</p>
       </div>
-      <form class="mt-8 space-y-6" @submit.prevent="handleSubmit">
-        <div class="rounded-md shadow-sm -space-y-px">
+
+      <!-- Registration Form -->
+      <div class="bg-white p-8 rounded-2xl shadow-xl">
+        <form class="space-y-6" @submit.prevent="handleSubmit">
           <div>
-            <label for="name" class="sr-only">Full Name</label>
-            <input v-model="name" id="name" name="name" type="text" required
-              class="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-              placeholder="Full Name">
+            <label class="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
+            <input v-model="name" type="text" required
+              class="appearance-none block w-full px-4 py-3 border border-gray-300 rounded-lg placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200"
+              placeholder="Enter your full name">
           </div>
+
           <div>
-            <label for="email" class="sr-only">Email address</label>
-            <input v-model="email" id="email" name="email" type="email" required
-              class="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-              placeholder="Email address">
+            <label class="block text-sm font-medium text-gray-700 mb-1">Email address</label>
+            <input v-model="email" type="email" required
+              class="appearance-none block w-full px-4 py-3 border border-gray-300 rounded-lg placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200"
+              placeholder="Enter your email">
           </div>
+
           <div>
-            <label for="password" class="sr-only">Password</label>
-            <input v-model="password" id="password" name="password" type="password" required
-              class="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-              placeholder="Password">
+            <label class="block text-sm font-medium text-gray-700 mb-1">Password</label>
+            <input v-model="password" type="password" required
+              class="appearance-none block w-full px-4 py-3 border border-gray-300 rounded-lg placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200"
+              placeholder="Create a password">
           </div>
+
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-2">Account Type</label>
-            <select v-model="role" required
-              class="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm">
+            <label class="block text-sm font-medium text-gray-700 mb-1">Confirm Password</label>
+            <input v-model="confirmPassword" type="password" required
+              class="appearance-none block w-full px-4 py-3 border border-gray-300 rounded-lg placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200"
+              placeholder="Confirm your password">
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Account Type</label>
+            <select v-model="role"
+              class="block w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200">
               <option value="buyer">Buyer</option>
               <option value="seller">Seller</option>
             </select>
           </div>
-          <div v-if="role === 'seller'" class="mt-4">
-            <label class="block text-sm font-medium text-gray-700 mb-2">Store Name</label>
-            <input v-model="storeName" type="text" required
-              class="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-              placeholder="Your store name">
-            
-            <label class="block text-sm font-medium text-gray-700 mt-4 mb-2">Postal Code</label>
-            <input v-model="postalCode" type="text" required
-              class="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-              placeholder="Store postal code">
+
+          <div v-if="role === 'seller'">
+            <label class="block text-sm font-medium text-gray-700 mb-1">Store Name</label>
+            <input v-model="storeName" type="text"
+              class="appearance-none block w-full px-4 py-3 border border-gray-300 rounded-lg placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200"
+              placeholder="Enter your store name">
           </div>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Postal Code</label>
+            <input v-model="postalCode" type="text" required
+              class="appearance-none block w-full px-4 py-3 border border-gray-300 rounded-lg placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200"
+              placeholder="Enter your postal code">
+          </div>
+
+          <div>
+            <button type="submit"
+              class="w-full bg-gradient-to-r from-indigo-600 to-purple-600 text-white py-3 px-4 rounded-lg hover:from-indigo-700 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 font-medium transition-all duration-200 shadow-md hover:shadow-lg">
+              Create Account
+            </button>
+          </div>
+        </form>
+
+        <!-- Login Link -->
+        <div class="mt-6 text-center">
+          <p class="text-sm text-gray-600">
+            Already have an account?
+            <router-link to="/login" 
+              class="font-medium text-indigo-600 hover:text-indigo-700 transition-colors duration-200">
+              Sign in here
+            </router-link>
+          </p>
         </div>
 
-        <div>
-          <button type="submit"
-            class="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-            Sign up
-          </button>
+        <!-- Error Message -->
+        <div v-if="error" class="mt-4 text-center text-sm text-red-600">
+          {{ errorMessage }}
         </div>
-      </form>
-
-      <div class="text-center">
-        <router-link to="/login" class="text-indigo-600 hover:text-indigo-500">
-          Already have an account? Sign in
-        </router-link>
       </div>
+    </div>
+  </div>
 
-      <div v-if="error" class="mt-4 text-center text-red-600">
-        {{ errorMessage }}
-      </div>
+  <!-- Add this after successful registration -->
+  <div v-if="registrationComplete" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div class="bg-white p-8 rounded-2xl shadow-xl max-w-md mx-4">
+      <h3 class="text-2xl font-bold text-gray-900 mb-4">Verify Your Email</h3>
+      <p class="text-gray-600 mb-6">
+        We've sent a verification link to your email address. Please check your inbox and verify your email to continue.
+      </p>
+      <router-link to="/login"
+        class="block w-full text-center bg-gradient-to-r from-indigo-600 to-purple-600 text-white py-3 px-4 rounded-lg hover:from-indigo-700 hover:to-purple-700 transition-all duration-200">
+        Go to Login
+      </router-link>
     </div>
   </div>
 </template>
@@ -77,12 +116,14 @@ const authStore = useAuthStore();
 const name = ref('');
 const email = ref('');
 const password = ref('');
+const confirmPassword = ref('');
 const role = ref('buyer');
 const storeName = ref('');
 const postalCode = ref('');
 const error = ref(null);
 const errorMessage = ref('');
 const loading = ref(false);
+const registrationComplete = ref(false);
 
 const handleSubmit = async () => {
   try {
@@ -93,6 +134,12 @@ const handleSubmit = async () => {
     // Validate password
     if (password.value.length < 6) {
       errorMessage.value = 'Password must be at least 6 characters long';
+      return;
+    }
+
+    // Validate confirm password
+    if (password.value !== confirmPassword.value) {
+      errorMessage.value = 'Passwords do not match';
       return;
     }
 
@@ -114,7 +161,7 @@ const handleSubmit = async () => {
     while (retryCount <= maxRetries) {
       try {
         await authStore.register(email.value, password.value, userData);
-        router.push(role.value === 'seller' ? '/seller/dashboard' : '/buyer/marketplace');
+        registrationComplete.value = true;
         return;
       } catch (e) {
         if (e.code === 'auth/network-request-failed' && retryCount < maxRetries) {

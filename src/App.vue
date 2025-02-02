@@ -2,15 +2,19 @@
 import { useAuthStore } from '@/stores/auth';
 import Navbar from '@/components/shared/Navbar.vue';
 import NotificationToast from '@/components/shared/NotificationToast.vue';
+import Footer from '@/components/shared/Footer.vue';
 
 const authStore = useAuthStore();
 </script>
 
 <template>
-  <div class="min-h-screen bg-gray-100">
+  <div class="min-h-screen flex flex-col">
     <Navbar />
-    <NotificationToast />
-    <router-view></router-view>
+    <main class="flex-grow">
+      <NotificationToast />
+      <router-view></router-view>
+    </main>
+    <Footer />
   </div>
 </template>
 

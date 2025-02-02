@@ -1,48 +1,53 @@
 <template>
-  <div class="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-    <div class="max-w-md w-full space-y-8">
-      <div>
-        <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">Sign in to BayanihanMart</h2>
-      </div>
-      <form class="mt-8 space-y-6" @submit.prevent="handleSubmit">
-        <div class="rounded-md shadow-sm -space-y-px">
-          <div>
-            <label for="email" class="sr-only">Email address</label>
-            <input v-model="email" id="email" name="email" type="email" required
-              class="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-              placeholder="Email address">
-          </div>
-          <div>
-            <label for="password" class="sr-only">Password</label>
-            <input v-model="password" id="password" name="password" type="password" required
-              class="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-              placeholder="Password">
-          </div>
-        </div>
-
-        <div>
-          <button type="submit"
-            class="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-            Sign in
-          </button>
-        </div>
-
-        <div class="flex items-center justify-center">
-          <button type="button" @click="handleGoogleSignIn"
-            class="group relative w-full flex justify-center py-2 px-4 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-            Sign in with Google
-          </button>
-        </div>
-      </form>
-
+  <div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-50 via-white to-purple-50 py-6 px-4 sm:py-12 sm:px-6 lg:px-8">
+    <div class="w-full max-w-md space-y-6 p-4 sm:p-0">
+      <!-- Logo and Title -->
       <div class="text-center">
-        <router-link to="/register" class="text-indigo-600 hover:text-indigo-500">
-          Don't have an account? Sign up
-        </router-link>
+        <h2 class="text-2xl sm:text-3xl font-extrabold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent mb-2">
+          Welcome Back
+        </h2>
+        <p class="text-gray-600 text-sm mb-6 sm:mb-8">Sign in to continue to BayanihanMart</p>
       </div>
 
-      <div v-if="error" class="mt-4 text-center text-red-600">
-        {{ error }}
+      <!-- Login Form -->
+      <div class="bg-white p-6 sm:p-8 rounded-2xl shadow-xl">
+        <form class="space-y-4 sm:space-y-6" @submit.prevent="handleSubmit">
+          <div>
+            <label for="email" class="block text-sm font-medium text-gray-700 mb-1">
+              Email address
+            </label>
+            <input v-model="email" id="email" name="email" type="email" required
+              class="appearance-none block w-full px-3 sm:px-4 py-2.5 sm:py-3 border border-gray-300 rounded-lg placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200 text-sm sm:text-base"
+              placeholder="Enter your email">
+          </div>
+
+          <div>
+            <label for="password" class="block text-sm font-medium text-gray-700 mb-1">
+              Password
+            </label>
+            <input v-model="password" id="password" name="password" type="password" required
+              class="appearance-none block w-full px-3 sm:px-4 py-2.5 sm:py-3 border border-gray-300 rounded-lg placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200 text-sm sm:text-base"
+              placeholder="Enter your password">
+          </div>
+
+          <div>
+            <button type="submit"
+              class="w-full bg-gradient-to-r from-indigo-600 to-purple-600 text-white py-2.5 sm:py-3 px-4 rounded-lg hover:from-indigo-700 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 font-medium transition-all duration-200 shadow-md hover:shadow-lg text-sm sm:text-base">
+              Sign in
+            </button>
+          </div>
+        </form>
+
+        <!-- Registration Link -->
+        <div class="mt-4 sm:mt-6 text-center">
+          <p class="text-sm text-gray-600">
+            Don't have an account?
+            <router-link to="/register" 
+              class="font-medium text-indigo-600 hover:text-indigo-700 transition-colors duration-200">
+              Register here
+            </router-link>
+          </p>
+        </div>
       </div>
     </div>
   </div>

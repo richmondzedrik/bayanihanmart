@@ -75,16 +75,29 @@ const selectedProduct = ref(null);
 
 onMounted(async () => {
   await refreshProducts();
+  if (authStore.user) {
+    isDisasterAffected.value = authStore.user.isDisasterAffected || false;
+  }
 });
 
 async function refreshProducts() {
   if (authStore.user) {
-    await productStore.getProductsBySeller(authStore.user.uid);
+    try {
+      await productStore.getProductsBySeller(authStore.user.uid);
+    } catch (error) {
+      console.error('Error fetching products:', error);
+    }
   }
 }
 
 async function updateDisasterStatus() {
-  // Implement disaster status update logic
+  try {
+    await productStore.updateSellerDisasterStatus(authStore.user.uid, isDisasterAffected.value);
+  } catch (error) {
+    console.error('Error updating disaster status:', error);
+    // Revert the toggle if update fails
+    isDisasterAffected.value = !isDisasterAffected.value;
+  }
 }
 
 function editProduct(product) {

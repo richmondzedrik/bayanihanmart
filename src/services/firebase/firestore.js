@@ -66,5 +66,18 @@ export const firestoreService = {
     } catch (error) {
       throw error;
     }
+  },
+
+  // Update product
+  async updateProduct(productId, productData) {
+    try {
+      const productRef = doc(db, 'products', productId);
+      await updateDoc(productRef, {
+        ...productData,
+        updatedAt: new Date(),
+      });
+    } catch (error) {
+      throw error;
+    }
   }
 };

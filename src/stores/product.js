@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia';
 import { ref } from 'vue';
 import { firestoreService } from '@/services/firebase/firestore';
-import { collection, getDocs, getDoc, doc } from 'firebase/firestore';
+import { collection, getDocs, getDoc, doc, updateDoc } from 'firebase/firestore';
 import { db } from '@/services/firebase/config';
 
 export const useProductStore = defineStore('product', () => {
@@ -63,12 +63,58 @@ export const useProductStore = defineStore('product', () => {
     }
   };
 
+  async function updateSellerDisasterStatus(sellerId, isDisasterAffected) {
+    try {
+      loading.value = true;
+      error.value = null;
+      await updateDoc(doc(db, 'users', sellerId), {
+        isDisasterAffected,
+        updatedAt: new Date()
+      });
+    } catch (e) {
+      error.value = e.message;
+      throw e;
+    } finally {
+      loading.value = false;
+    }
+  }
+
+  async function getProductsBySeller(sellerId) {
+    try {
+      loading.value = true;
+      error.value = null;
+      products.value = await firestoreService.getProductsBySeller(sellerId);
+    } catch (e) {
+      error.value = e.message;
+      throw e;
+    } finally {
+      loading.value = false;
+    }
+  }
+
+  async function updateProduct(productId, productData) {
+    try {
+      loading.value = true;
+      error.value = null;
+      await firestoreService.updateProduct(productId, productData);
+      await fetchSellerProducts(productData.sellerId);
+    } catch (e) {
+      error.value = e.message;
+      throw e;
+    } finally {
+      loading.value = false;
+    }
+  }
+
   return {
     products,
     loading,
     error,
     fetchProducts,
     fetchSellerProducts,
-    createProduct
+    createProduct,
+    updateProduct,
+    getProductsBySeller,
+    updateSellerDisasterStatus
   };
 });
