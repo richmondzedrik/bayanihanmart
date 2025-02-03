@@ -95,7 +95,10 @@
     <div class="bg-white p-8 rounded-2xl shadow-xl max-w-md mx-4">
       <h3 class="text-2xl font-bold text-gray-900 mb-4">Verify Your Email</h3>
       <p class="text-gray-600 mb-6">
-        We've sent a verification link to your email address. Please check your inbox and verify your email to continue.
+        We've sent a verification link to your email address. Please check your inbox and click the verification link to activate your account.
+      </p>
+      <p class="text-gray-500 text-sm mb-6">
+        If you don't see the email, please check your spam folder.
       </p>
       <router-link to="/login"
         class="block w-full text-center bg-gradient-to-r from-indigo-600 to-purple-600 text-white py-3 px-4 rounded-lg hover:from-indigo-700 hover:to-purple-700 transition-all duration-200">

@@ -1,6 +1,6 @@
 <template>
   <div v-if="show" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full">
-    <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+    <div class="relative top-20 mx-auto p-5 border max-w-xl shadow-lg rounded-md bg-white">
       <div class="mt-3">
         <h3 class="text-lg font-medium leading-6 text-gray-900">Add New Product</h3>
         <form @submit.prevent="handleSubmit" class="mt-4">
@@ -28,14 +28,32 @@
               class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
           </div>
 
-          <div class="flex justify-end space-x-2">
+          <div class="mb-4">
+            <label class="block text-gray-700 text-sm font-bold mb-2">Product Image (Optional)</label>
+            <div class="flex items-center justify-center w-full">
+              <label class="flex flex-col w-full h-32 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer hover:bg-gray-50">
+                <div v-if="!imagePreview" class="flex flex-col items-center justify-center pt-7">
+                  <svg class="w-8 h-8 mb-1 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                  </svg>
+                  <p class="text-sm text-gray-500">Click to upload image</p>
+                </div>
+                <div v-else class="flex items-center justify-center h-full">
+                  <img :src="imagePreview" alt="Preview" class="h-full object-contain">
+                </div>
+                <input type="file" class="hidden" accept="image/*" @change="handleImageChange">
+              </label>
+            </div>
+          </div>
+
+          <div class="flex justify-end gap-4 mt-6">
             <button type="button" @click="$emit('close')"
-              class="px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300">
+              class="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition-colors">
               Cancel
             </button>
-            <button type="submit"
-              class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
-              Add Product
+            <button type="submit" :disabled="loading"
+              class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors disabled:opacity-50">
+              {{ loading ? 'Adding...' : 'Add Product' }}
             </button>
           </div>
         </form>
@@ -48,6 +66,7 @@
 import { ref } from 'vue';
 import { useAuthStore } from '@/stores/auth';
 import { useProductStore } from '@/stores/product';
+import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from 'firebase/storage';
 
 const props = defineProps({
   show: Boolean
@@ -65,14 +84,63 @@ const productData = ref({
   sellerId: authStore.user?.uid
 });
 
+const imageFile = ref(null);
+const imagePreview = ref(null);
+const loading = ref(false);
+
+const handleImageChange = (event) => {
+  const file = event.target.files[0];
+  if (file) {
+    imageFile.value = file;
+    imagePreview.value = URL.createObjectURL(file);
+  }
+};
+
+const uploadImage = async () => {
+  if (!imageFile.value) return null;
+  
+  try {
+    const storage = getStorage();
+    const filename = `products/${authStore.user.uid}-${Date.now()}-${imageFile.value.name}`;
+    const imgRef = storageRef(storage, filename);
+    
+    const metadata = {
+      contentType: imageFile.value.type,
+      cacheControl: 'public,max-age=3600'
+    };
+    
+    const snapshot = await uploadBytes(imgRef, imageFile.value, metadata);
+    const downloadURL = await getDownloadURL(snapshot.ref);
+    return downloadURL;
+  } catch (error) {
+    console.error('Error uploading image:', error);
+    throw new Error('Failed to upload image. Please try again.');
+  }
+};
+
 const handleSubmit = async () => {
   try {
+    loading.value = true;
+    let imageUrl = null;
+    
+    if (imageFile.value) {
+      try {
+        imageUrl = await uploadImage();
+      } catch (uploadError) {
+        console.error('Image upload error:', uploadError);
+        alert('Failed to upload image. Please try again or skip the image.');
+        loading.value = false;
+        return;
+      }
+    }
+
     const productWithSeller = {
       ...productData.value,
       price: Number(productData.value.price),
       stock: Number(productData.value.stock),
       sellerId: authStore.user.uid,
-      createdAt: new Date()
+      createdAt: new Date(),
+      imageUrl
     };
     
     await productStore.createProduct(productWithSeller);
@@ -87,8 +155,13 @@ const handleSubmit = async () => {
       stock: '',
       sellerId: authStore.user?.uid
     };
+    imageFile.value = null;
+    imagePreview.value = null;
   } catch (error) {
-    console.error('Error adding product:', error);
+    console.error('Error creating product:', error);
+    alert('Failed to create product. Please try again.');
+  } finally {
+    loading.value = false;
   }
 };
 </script>

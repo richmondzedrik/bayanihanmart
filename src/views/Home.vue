@@ -6,10 +6,10 @@
       <div class="relative z-10 py-16 md:py-32">
         <div class="container mx-auto px-4">
           <div class="max-w-4xl mx-auto text-center">
-            <h1 class="text-4xl sm:text-5xl md:text-7xl font-extrabold mb-6 md:mb-8 leading-tight tracking-tight">
+            <h1 class="text-4xl sm:text-5xl md:text-7xl font-extrabold mb-6 md:mb-8 leading-tight tracking-tight animate-fadeIn">
               Welcome to <span class="text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 to-yellow-500">BayanihanMart</span>
             </h1>
-            <p class="text-lg sm:text-xl md:text-2xl mb-8 md:mb-12 text-gray-100 leading-relaxed max-w-3xl mx-auto px-4">
+            <p class="text-lg sm:text-xl md:text-2xl mb-8 md:mb-12 text-gray-100 leading-relaxed max-w-3xl mx-auto px-4 animate-slideUp">
               Your community marketplace connecting local sellers and buyers, empowering disaster-affected communities through digital commerce
             </p>
             
@@ -38,8 +38,10 @@
     <!-- Features Section -->
     <div class="py-16 md:py-24 bg-white">
       <div class="container mx-auto px-4">
-        <h2 class="text-2xl sm:text-3xl md:text-4xl font-bold text-center mb-12 md:mb-16 text-gray-900">Why Choose BayanihanMart?</h2>
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-12 mb-16 max-w-6xl mx-auto">
+        <h2 class="text-2xl sm:text-3xl md:text-4xl font-bold text-center mb-12 md:mb-16 text-gray-900 animate-fadeIn">
+          Why Choose BayanihanMart?
+        </h2>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-12 mb-16 max-w-6xl mx-auto animate-slideRight">
           <div class="text-center p-6 md:p-8 rounded-xl hover:shadow-xl transition-all duration-300 bg-gray-50">
             <div class="w-20 h-20 bg-indigo-100 rounded-full flex items-center justify-center mx-auto mb-6">
               <svg class="w-10 h-10 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -76,7 +78,9 @@
     <!-- Featured Products Section -->
     <div class="bg-gray-50 py-16 md:py-24">
       <div class="container mx-auto px-4">
-        <h2 class="text-2xl sm:text-3xl md:text-4xl font-bold text-center mb-12 md:mb-16 text-gray-900">Featured Products</h2>
+        <h2 class="text-2xl sm:text-3xl md:text-4xl font-bold text-center mb-12 md:mb-16 text-gray-900 animate-fadeIn">
+          Featured Products
+        </h2>
         
         <div v-if="loading" class="text-center">
           <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto"></div>
@@ -86,7 +90,7 @@
           {{ error }}
         </div>
 
-        <div v-else class="max-w-7xl mx-auto">
+        <div v-else class="max-w-7xl mx-auto animate-scale">
           <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
             <div v-for="product in products.slice(0, 6)" :key="product.id"
                  class="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-2xl transition-all duration-300">
@@ -146,3 +150,63 @@ onMounted(() => {
   fetchProducts();
 });
 </script>
+
+<style scoped>
+.animate-fadeIn {
+  animation: fadeIn 1s ease-out;
+}
+
+.animate-slideUp {
+  animation: slideUp 0.8s ease-out;
+}
+
+.animate-slideRight {
+  animation: slideRight 0.8s ease-out;
+}
+
+.animate-scale {
+  animation: scale 0.5s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideRight {
+  from {
+    opacity: 0;
+    transform: translateX(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes scale {
+  from {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+</style>

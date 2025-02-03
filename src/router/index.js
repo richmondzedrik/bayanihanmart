@@ -44,12 +44,25 @@ const routes = [
     path: '/contact',
     name: 'Contact',
     component: () => import('../views/ContactView.vue')
+  },
+  {
+    path: '/profile',
+    name: 'profile',
+    component: () => import('@/views/UserProfileView.vue'),
+    meta: { requiresAuth: true }
   }
 ]
 
 const router = createRouter({
   history: createWebHistory(),
-  routes
+  routes,
+  scrollBehavior(to, from, savedPosition) {
+    if (savedPosition) {
+      return savedPosition
+    } else {
+      return { top: 0 }
+    }
+  }
 })
 
 // Navigation guard

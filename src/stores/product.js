@@ -45,9 +45,10 @@ export const useProductStore = defineStore('product', () => {
       error.value = null;
       const querySnapshot = await getDocs(collection(db, 'products'));
       const productsWithSellers = await Promise.all(
-        querySnapshot.docs.map(async (doc) => {
-          const product = { id: doc.id, ...doc.data() };
-          const sellerDoc = await getDoc(doc(db, 'users', product.sellerId));
+        querySnapshot.docs.map(async (productDoc) => {
+          const product = { id: productDoc.id, ...productDoc.data() };
+          const sellerRef = doc(db, 'users', product.sellerId);
+          const sellerDoc = await getDoc(sellerRef);
           return {
             ...product,
             seller: sellerDoc.exists() ? sellerDoc.data() : null
@@ -106,6 +107,23 @@ export const useProductStore = defineStore('product', () => {
     }
   }
 
+  const getAllProducts = async () => {
+    try {
+      const productsRef = collection(db, 'products');
+      const querySnapshot = await getDocs(productsRef);
+      const products = [];
+      
+      querySnapshot.forEach((doc) => {
+        products.push({ id: doc.id, ...doc.data() });
+      });
+      
+      products.value = products;
+    } catch (error) {
+      console.error('Error fetching products:', error);
+      throw error;
+    }
+  };
+
   return {
     products,
     loading,
@@ -115,6 +133,7 @@ export const useProductStore = defineStore('product', () => {
     createProduct,
     updateProduct,
     getProductsBySeller,
-    updateSellerDisasterStatus
+    updateSellerDisasterStatus,
+    getAllProducts
   };
 });

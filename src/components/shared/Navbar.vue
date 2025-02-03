@@ -16,7 +16,7 @@
               Home
             </router-link>
             
-            <!-- Authenticated Navigation -->
+            <!-- Authenticated Navigation -->    
             <template v-if="authStore.user">
               <!-- Seller Navigation -->
               <div v-if="authStore.user?.role === 'seller'" class="flex space-x-1">
@@ -72,7 +72,10 @@
         <!-- Desktop Auth Buttons -->
         <div class="hidden md:flex items-center space-x-4">
           <template v-if="authStore.user">
-            <span class="text-sm font-medium text-gray-700">{{ authStore.user?.name }}</span>
+            <router-link to="/profile" 
+              class="text-gray-700 hover:text-indigo-600 px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200">
+              {{ authStore.user?.name }}
+            </router-link>
             <button @click="handleLogout" 
               class="bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-6 py-2 rounded-lg text-sm font-medium hover:from-indigo-700 hover:to-purple-700 transition-all duration-200 shadow-sm hover:shadow">
               Logout
@@ -126,9 +129,12 @@
           <!-- Mobile Auth Buttons -->
           <div class="pt-4 pb-3 border-t border-gray-200">
             <template v-if="authStore.user">
-              <div class="px-3 text-sm font-medium text-gray-700">{{ authStore.user?.name }}</div>
+              <router-link to="/profile"
+                class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50">
+                {{ authStore.user?.name }}
+              </router-link>
               <button @click="handleLogout" 
-                class="mt-2 w-full text-left px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50">
+                class="block w-full text-left mt-2 px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50">
                 Logout
               </button>
             </template>

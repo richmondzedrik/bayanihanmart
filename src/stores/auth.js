@@ -102,11 +102,16 @@ export const useAuthStore = defineStore('auth', () => {
       loading.value = true;
       error.value = null;
       
-      // Add retry logic for emulator connection
       let retries = 3;
       while (retries > 0) {
         try {
           const { user: firebaseUser } = await signInWithEmailAndPassword(auth, email, password);
+          
+          // Check if email is verified
+          if (!firebaseUser.emailVerified) {
+            throw new Error('Please verify your email before logging in. Check your inbox for the verification link.');
+          }
+          
           const userDoc = await getDoc(doc(db, 'users', firebaseUser.uid));
           if (userDoc.exists()) {
             user.value = {
@@ -114,9 +119,6 @@ export const useAuthStore = defineStore('auth', () => {
               email: firebaseUser.email,
               ...userDoc.data()
             };
-          }
-          if (!user.value.emailVerified) {
-            throw new Error('Please verify your email before logging in');
           }
           return user.value;
         } catch (e) {
@@ -142,6 +144,10 @@ export const useAuthStore = defineStore('auth', () => {
       loading.value = true;
       error.value = null;
       const { user: firebaseUser } = await createUserWithEmailAndPassword(auth, email, password);
+      
+      // Send verification email
+      await sendEmailVerification(firebaseUser);
+      
       const userDocData = {
         ...userData,
         uid: firebaseUser.uid,
@@ -149,9 +155,9 @@ export const useAuthStore = defineStore('auth', () => {
         emailVerified: firebaseUser.emailVerified,
         createdAt: new Date().toISOString()
       };
+      
       await setDoc(doc(db, 'users', firebaseUser.uid), userDocData);
       user.value = userDocData;
-      await sendEmailVerification(firebaseUser);
       return user.value;
     } catch (e) {
       error.value = e.message;
