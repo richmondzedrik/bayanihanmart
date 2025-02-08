@@ -1,16 +1,14 @@
 import { defineStore } from 'pinia';
 import { ref } from 'vue';
 import { db } from '@/services/firebase/config';
-import { collection, onSnapshot, query, where, orderBy, Timestamp, doc, updateDoc, addDoc, getDocs, writeBatch } from 'firebase/firestore';
+import { collection, onSnapshot, query, where, orderBy, doc, updateDoc, addDoc, getDocs, writeBatch } from 'firebase/firestore';
 import { useAuthStore } from './auth';
 
 export const useNotificationStore = defineStore('notification', () => {
-  const notifications = ref([]); // Real-time notifications
-  const toasts = ref([]); // Toast notifications
+  const notifications = ref([]);
   const unreadCount = ref(0);
   let unsubscribe = null;
 
-  // Real-time notifications subscription
   const subscribeToNotifications = () => {
     const authStore = useAuthStore();
     if (!authStore.user?.uid) return;
@@ -22,45 +20,40 @@ export const useNotificationStore = defineStore('notification', () => {
       orderBy('createdAt', 'desc')
     );
 
+    notifications.value = [];
+    unreadCount.value = 0;
+
     unsubscribe = onSnapshot(q, (snapshot) => {
       snapshot.docChanges().forEach((change) => {
+        const notification = {
+          id: change.doc.id,
+          ...change.doc.data(),
+          createdAt: change.doc.data().createdAt?.toDate()
+        };
+
         if (change.type === 'added') {
-          const notification = {
-            id: change.doc.id,
-            ...change.doc.data(),
-            createdAt: change.doc.data().createdAt?.toDate()
-          };
-          notifications.value.unshift(notification);
-          if (!notification.read) {
-            unreadCount.value++;
+          const existingIndex = notifications.value.findIndex(n => n.id === notification.id);
+          if (existingIndex === -1) {
+            notifications.value.unshift(notification);
+            if (!notification.read) {
+              unreadCount.value++;
+            }
+          }
+        } else if (change.type === 'modified') {
+          const index = notifications.value.findIndex(n => n.id === notification.id);
+          if (index !== -1) {
+            const wasUnread = !notifications.value[index].read;
+            const isNowRead = notification.read;
+            if (wasUnread && isNowRead) {
+              unreadCount.value = Math.max(0, unreadCount.value - 1);
+            }
+            notifications.value[index] = notification;
           }
         }
       });
     });
-  };
 
-  // Toast notifications
-  const addToast = (toast) => {
-    const id = Date.now().toString();
-    const newToast = {
-      id,
-      ...toast,
-      duration: toast.duration || 5000
-    };
-    toasts.value.push(newToast);
-
-    if (newToast.duration > 0) {
-      setTimeout(() => {
-        removeToast(id);
-      }, newToast.duration);
-    }
-  };
-
-  const removeToast = (id) => {
-    const index = toasts.value.findIndex(t => t.id === id);
-    if (index > -1) {
-      toasts.value.splice(index, 1);
-    }
+    return unsubscribe;
   };
 
   const markAsRead = async (notificationId) => {
@@ -70,13 +63,6 @@ export const useNotificationStore = defineStore('notification', () => {
         read: true,
         updatedAt: new Date()
       });
-      
-      // Update local state
-      const notification = notifications.value.find(n => n.id === notificationId);
-      if (notification && !notification.read) {
-        notification.read = true;
-        unreadCount.value--;
-      }
     } catch (error) {
       console.error('Error marking notification as read:', error);
       throw error;
@@ -99,7 +85,7 @@ export const useNotificationStore = defineStore('notification', () => {
     try {
       const notificationsRef = collection(db, 'notifications');
       const newNotification = {
-        userId: authStore.user.uid,
+        userId: notification.userId || authStore.user.uid,
         message: notification.message,
         type: notification.type || 'info',
         read: false,
@@ -139,14 +125,11 @@ export const useNotificationStore = defineStore('notification', () => {
 
   return {
     notifications,
-    toasts,
     unreadCount,
     subscribeToNotifications,
     markAsRead,
     clearNotifications,
     addNotification,
-    notifyNewProduct,
-    addToast,
-    removeToast
+    notifyNewProduct
   };
 }); 

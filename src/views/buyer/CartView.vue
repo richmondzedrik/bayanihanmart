@@ -103,11 +103,13 @@ import { useAuthStore } from '@/stores/auth';
 import { collection, addDoc, doc, getDoc, writeBatch } from 'firebase/firestore';
 import { db } from '@/services/firebase/config';
 import { useProductStore } from '@/stores/product';
+import { useNotificationStore } from '@/stores/notification';
 
 const router = useRouter();
 const cartStore = useCartStore();
 const authStore = useAuthStore();
 const productStore = useProductStore();
+const notificationStore = useNotificationStore();
 const processing = ref(false);
 
 const updateQuantity = (productId, quantity) => {
@@ -181,6 +183,14 @@ const checkout = async () => {
       read: false,
       createdAt: new Date(),
       orderId: orderRef.id
+    });
+    
+    // Show toast notification for successful checkout
+    notificationStore.addToast({
+      title: 'Order Placed',
+      message: 'Your order has been successfully placed!',
+      type: 'success',
+      duration: 5000
     });
     
     // Refresh product store to update stock numbers everywhere

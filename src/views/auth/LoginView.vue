@@ -58,10 +58,12 @@ import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAuthStore } from '@/stores/auth';
 import { useNotificationStore } from '@/stores/notification';
+import { useToastStore } from '@/stores/toastNotification';
 
 const router = useRouter();
 const authStore = useAuthStore();
 const notificationStore = useNotificationStore();
+const toastStore = useToastStore();
 
 const email = ref('');
 const password = ref('');
@@ -79,8 +81,8 @@ const handleSubmit = async () => {
       throw new Error('User role not found');
     }
     
-    // Add success notification
-    notificationStore.addToast({
+    // Add success toast notification
+    toastStore.addToast({
       title: 'Welcome back!',
       message: 'You have successfully logged in.',
       type: 'success',

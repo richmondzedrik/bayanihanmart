@@ -1,7 +1,7 @@
 <template>
   <div class="fixed bottom-4 right-4 z-50 space-y-2">
     <TransitionGroup name="notification">
-      <div v-for="toast in notificationStore.toasts" 
+      <div v-for="toast in toastStore.toasts" 
            :key="toast.id"
            :class="[
              'p-4 rounded-lg shadow-lg max-w-md transform transition-all duration-300',
@@ -12,7 +12,7 @@
             <h3 v-if="toast.title" class="font-semibold">{{ toast.title }}</h3>
             <p class="text-sm">{{ toast.message }}</p>
           </div>
-          <button @click="notificationStore.removeToast(toast.id)" 
+          <button @click="toastStore.removeToast(toast.id)" 
                   class="ml-4 text-current opacity-70 hover:opacity-100">
             ×
           </button>
@@ -23,9 +23,9 @@
 </template>
 
 <script setup>
-import { useNotificationStore } from '@/stores/notification';
+import { useToastStore } from '@/stores/toastNotification';
 
-const notificationStore = useNotificationStore();
+const toastStore = useToastStore();
 
 const getTypeClasses = (type) => {
   return {

@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia';
 import { ref } from 'vue';
-import { collection, query, where, onSnapshot, updateDoc, doc, orderBy, getDoc, writeBatch } from 'firebase/firestore';
+import { collection, query, where, onSnapshot, updateDoc, doc, orderBy, getDoc, writeBatch, addDoc } from 'firebase/firestore';
 import { db } from '@/services/firebase/config';
 
 export const useOrderStore = defineStore('order', () => {
@@ -57,9 +57,28 @@ export const useOrderStore = defineStore('order', () => {
     try {
       loading.value = true;
       error.value = null;
-      await updateDoc(doc(db, 'orders', orderId), {
+      
+      // Get order details first
+      const orderRef = doc(db, 'orders', orderId);
+      const orderSnap = await getDoc(orderRef);
+      if (!orderSnap.exists()) throw new Error('Order not found');
+      
+      const orderData = orderSnap.data();
+      
+      // Update order status
+      await updateDoc(orderRef, {
         status,
         updatedAt: new Date()
+      });
+
+      // Add notification for status change
+      await addDoc(collection(db, 'notifications'), {
+        userId: status === 'cancelled' ? orderData.sellerId : orderData.buyerId,
+        type: 'order_status',
+        message: `Order #${orderId} has been ${status}`,
+        read: false,
+        createdAt: new Date(),
+        orderId: orderId
       });
     } catch (e) {
       error.value = e.message;

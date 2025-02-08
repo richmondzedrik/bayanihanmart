@@ -1,5 +1,5 @@
 <template>
-  <div class="relative">
+  <div class="relative" ref="dropdownRef">
     <!-- Notification Bell -->
     <button @click="isOpen = !isOpen" 
       class="relative p-2 text-gray-600 hover:text-indigo-600 transition-colors">
@@ -44,17 +44,21 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue';
+import { ref, onMounted, onUnmounted, watch } from 'vue';
 import { useNotificationStore } from '@/stores/notification';
 import { formatDistanceToNow } from 'date-fns';
 import { useRouter } from 'vue-router';
+import { useAuthStore } from '@/stores/auth';
 
 const notificationStore = useNotificationStore();
 const isOpen = ref(false);
 const router = useRouter();
+const authStore = useAuthStore();
 
 onMounted(() => {
-  notificationStore.subscribeToNotifications();
+  if (authStore.user) {
+    notificationStore.subscribeToNotifications();
+  }
 });
 
 onUnmounted(() => {
@@ -62,16 +66,45 @@ onUnmounted(() => {
 });
 
 const formatDate = (date) => {
+  if (!date) return '';
   return formatDistanceToNow(date, { addSuffix: true });
 };
 
-const handleNotificationClick = (notification) => {
-  if (!notification.read) {
-    notificationStore.markAsRead(notification.id);
+const handleNotificationClick = async (notification) => {
+  try {
+    if (!notification.read) {
+      await notificationStore.markAsRead(notification.id);
+    }
+    
+    // Handle navigation based on notification type
+    if (notification.type === 'order_status' && notification.orderId) {
+      const route = authStore.user?.role === 'seller' ? '/seller/orders' : '/buyer/orders';
+      router.push(route);
+    } else if (notification.type === 'order' && notification.orderId) {
+      const route = authStore.user?.role === 'seller' ? '/seller/orders' : '/buyer/orders';
+      router.push(route);
+    }
+    
+    isOpen.value = false;
+  } catch (error) {
+    console.error('Error handling notification click:', error);
   }
-  
-  if (notification.type === 'product' && notification.productId) {
-    router.push(`/buyer/marketplace?product=${notification.productId}`);
+};
+
+// Add click outside handler
+const dropdownRef = ref(null);
+
+onMounted(() => {
+  document.addEventListener('click', handleClickOutside);
+});
+
+onUnmounted(() => {
+  document.removeEventListener('click', handleClickOutside);
+});
+
+const handleClickOutside = (event) => {
+  if (dropdownRef.value && !dropdownRef.value.contains(event.target)) {
+    isOpen.value = false;
   }
 };
 </script>
