@@ -127,6 +127,16 @@ const checkout = async () => {
     // Create a batch for atomic operations
     const batch = writeBatch(db);
     
+    // Get the seller ID from the first item (assuming all items are from same seller)
+    const firstItem = cartStore.items[0];
+    if (!firstItem) throw new Error('Cart is empty');
+    
+    const productRef = doc(db, 'products', firstItem.productId);
+    const productSnap = await getDoc(productRef);
+    const sellerId = productSnap.data()?.sellerId;
+    
+    if (!sellerId) throw new Error('Seller information not found');
+    
     // Verify current stock and update product quantities
     for (const item of cartStore.items) {
       const productRef = doc(db, 'products', item.productId);
@@ -152,6 +162,7 @@ const checkout = async () => {
     const orderRef = doc(collection(db, 'orders'));
     batch.set(orderRef, {
       buyerId: authStore.user.uid,
+      sellerId: sellerId,
       buyerName: authStore.user.displayName || authStore.user.email,
       items: cartStore.items,
       total: cartStore.total,
@@ -161,6 +172,16 @@ const checkout = async () => {
 
     // Commit all changes atomically
     await batch.commit();
+    
+    // Add notification for new order
+    await addDoc(collection(db, 'notifications'), {
+      userId: sellerId,
+      type: 'order',
+      message: `New order received from ${authStore.user.displayName || authStore.user.email}`,
+      read: false,
+      createdAt: new Date(),
+      orderId: orderRef.id
+    });
     
     // Refresh product store to update stock numbers everywhere
     await productStore.fetchProducts();

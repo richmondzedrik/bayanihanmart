@@ -80,7 +80,7 @@ const handleSubmit = async () => {
     }
     
     // Add success notification
-    notificationStore.addNotification({
+    notificationStore.addToast({
       title: 'Welcome back!',
       message: 'You have successfully logged in.',
       type: 'success',

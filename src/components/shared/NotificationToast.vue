@@ -1,18 +1,18 @@
 <template>
   <div class="fixed bottom-4 right-4 z-50 space-y-2">
     <TransitionGroup name="notification">
-      <div v-for="notification in notificationStore.notifications" 
-           :key="notification.id"
+      <div v-for="toast in notificationStore.toasts" 
+           :key="toast.id"
            :class="[
              'p-4 rounded-lg shadow-lg max-w-md transform transition-all duration-300',
-             getTypeClasses(notification.type)
+             getTypeClasses(toast.type)
            ]">
         <div class="flex justify-between items-start">
           <div>
-            <h3 v-if="notification.title" class="font-semibold">{{ notification.title }}</h3>
-            <p class="text-sm">{{ notification.message }}</p>
+            <h3 v-if="toast.title" class="font-semibold">{{ toast.title }}</h3>
+            <p class="text-sm">{{ toast.message }}</p>
           </div>
-          <button @click="notificationStore.removeNotification(notification.id)" 
+          <button @click="notificationStore.removeToast(toast.id)" 
                   class="ml-4 text-current opacity-70 hover:opacity-100">
             ×
           </button>

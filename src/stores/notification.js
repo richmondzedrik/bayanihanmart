@@ -5,10 +5,12 @@ import { collection, onSnapshot, query, where, orderBy, Timestamp, doc, updateDo
 import { useAuthStore } from './auth';
 
 export const useNotificationStore = defineStore('notification', () => {
-  const notifications = ref([]);
+  const notifications = ref([]); // Real-time notifications
+  const toasts = ref([]); // Toast notifications
   const unreadCount = ref(0);
   let unsubscribe = null;
 
+  // Real-time notifications subscription
   const subscribeToNotifications = () => {
     const authStore = useAuthStore();
     if (!authStore.user?.uid) return;
@@ -35,6 +37,30 @@ export const useNotificationStore = defineStore('notification', () => {
         }
       });
     });
+  };
+
+  // Toast notifications
+  const addToast = (toast) => {
+    const id = Date.now().toString();
+    const newToast = {
+      id,
+      ...toast,
+      duration: toast.duration || 5000
+    };
+    toasts.value.push(newToast);
+
+    if (newToast.duration > 0) {
+      setTimeout(() => {
+        removeToast(id);
+      }, newToast.duration);
+    }
+  };
+
+  const removeToast = (id) => {
+    const index = toasts.value.findIndex(t => t.id === id);
+    if (index > -1) {
+      toasts.value.splice(index, 1);
+    }
   };
 
   const markAsRead = async (notificationId) => {
@@ -113,11 +139,14 @@ export const useNotificationStore = defineStore('notification', () => {
 
   return {
     notifications,
+    toasts,
     unreadCount,
     subscribeToNotifications,
     markAsRead,
     clearNotifications,
     addNotification,
-    notifyNewProduct
+    notifyNewProduct,
+    addToast,
+    removeToast
   };
 }); 
