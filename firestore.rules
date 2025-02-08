@@ -17,11 +17,11 @@ service cloud.firestore {
       allow create: if request.auth != null 
         && request.resource.data.sellerId == request.auth.uid
         && (request.resource.data.imageUrl == null || 
-            request.resource.data.imageUrl.matches('https://firebasestorage.googleapis.com/.*'));
+            request.resource.data.imageUrl.matches('https://res.cloudinary.com/.*'));
       allow update: if request.auth != null 
         && resource.data.sellerId == request.auth.uid
         && (request.resource.data.imageUrl == null || 
-            request.resource.data.imageUrl.matches('https://firebasestorage.googleapis.com/.*'));
+            request.resource.data.imageUrl.matches('https://res.cloudinary.com/.*'));
       allow delete: if request.auth != null 
         && resource.data.sellerId == request.auth.uid;
     }

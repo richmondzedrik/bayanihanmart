@@ -66,7 +66,6 @@
 import { ref } from 'vue';
 import { useAuthStore } from '@/stores/auth';
 import { useProductStore } from '@/stores/product';
-import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from 'firebase/storage';
 
 const props = defineProps({
   show: Boolean
@@ -100,18 +99,22 @@ const uploadImage = async () => {
   if (!imageFile.value) return null;
   
   try {
-    const storage = getStorage();
-    const filename = `products/${authStore.user.uid}-${Date.now()}-${imageFile.value.name}`;
-    const imgRef = storageRef(storage, filename);
+    const formData = new FormData();
+    formData.append('file', imageFile.value);
+    formData.append('upload_preset', 'dmgivh17b'); // Get this from Cloudinary dashboard
     
-    const metadata = {
-      contentType: imageFile.value.type,
-      cacheControl: 'public,max-age=3600'
-    };
+    const response = await fetch(
+      `https://api.cloudinary.com/v1_1/dmgivh17b/image/upload`,
+      {
+        method: 'POST',
+        body: formData,
+      }
+    );
     
-    const snapshot = await uploadBytes(imgRef, imageFile.value, metadata);
-    const downloadURL = await getDownloadURL(snapshot.ref);
-    return downloadURL;
+    const data = await response.json();
+    if (data.error) throw new Error(data.error.message);
+    
+    return data.secure_url;
   } catch (error) {
     console.error('Error uploading image:', error);
     throw new Error('Failed to upload image. Please try again.');
