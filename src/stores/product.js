@@ -3,6 +3,7 @@ import { ref } from 'vue';
 import { firestoreService } from '@/services/firebase/firestore';
 import { collection, getDocs, getDoc, doc, updateDoc } from 'firebase/firestore';
 import { db } from '@/services/firebase/config';
+import { useNotificationStore } from '@/stores/notification';
 
 export const useProductStore = defineStore('product', () => {
   const products = ref([]);
@@ -24,11 +25,19 @@ export const useProductStore = defineStore('product', () => {
   }
 
   // Create new product
-  async function createProduct(productData) {
+  const createProduct = async (productData) => {
     try {
       loading.value = true;
       error.value = null;
       const productId = await firestoreService.createProduct(productData);
+      
+      // Add notification for new product
+      const notificationStore = useNotificationStore();
+      await notificationStore.notifyNewProduct({
+        id: productId,
+        ...productData
+      });
+      
       await fetchSellerProducts(productData.sellerId);
       return productId;
     } catch (e) {
@@ -37,7 +46,7 @@ export const useProductStore = defineStore('product', () => {
     } finally {
       loading.value = false;
     }
-  }
+  };
 
   const fetchProducts = async () => {
     try {

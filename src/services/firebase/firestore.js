@@ -8,7 +8,10 @@ import {
   deleteDoc,
   query,
   where,
-  getDocs
+  getDocs,
+  orderBy,
+  onSnapshot,
+  writeBatch
 } from 'firebase/firestore';
 
 export const firestoreService = {
