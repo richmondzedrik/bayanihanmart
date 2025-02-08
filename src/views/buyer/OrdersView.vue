@@ -1,8 +1,8 @@
 <template>
   <div class="container mx-auto px-4 py-8">
     <div class="mb-8">
-      <h1 class="text-3xl font-bold text-gray-900">Order Dashboard</h1>
-      <p class="mt-2 text-gray-600">Manage and track your orders in real-time</p>
+      <h1 class="text-3xl font-bold text-gray-900">My Orders</h1>
+      <p class="mt-2 text-gray-600">Track and manage your orders</p>
     </div>
 
     <!-- Loading State -->
@@ -23,18 +23,19 @@
           <div>
             <h3 class="text-lg font-semibold">Order #{{ order.id.slice(-6) }}</h3>
             <p class="text-gray-600">{{ new Date(order.createdAt.toDate()).toLocaleString() }}</p>
-            <div class="mt-2">
-              <p class="font-medium">Customer: {{ order.buyerName }}</p>
-              <p>Total: ₱{{ order.total.toFixed(2) }}</p>
-            </div>
           </div>
           
-          <div class="text-right">
-            <span :class="getStatusClass(order.status)"
-                  class="px-3 py-1 rounded-full text-sm font-medium">
-              {{ order.status }}
-            </span>
-          </div>
+          <span :class="getStatusClass(order.status)"
+                class="px-3 py-1 rounded-full text-sm font-medium">
+            {{ order.status }}
+          </span>
+
+          <button 
+            v-if="order.status === 'pending'"
+            @click="cancelOrder(order.id)"
+            class="px-3 py-1 text-sm font-medium text-red-600 hover:text-red-700 hover:bg-red-50 rounded-md transition-colors">
+            Cancel Order
+          </button>
         </div>
 
         <div class="mt-4">
@@ -48,16 +49,9 @@
           </ul>
         </div>
 
-        <div class="mt-4 flex justify-end">
-          <select v-model="order.status" 
-                  @change="updateStatus(order.id, $event.target.value)"
-                  class="rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
-            <option value="pending">Pending</option>
-            <option value="processing">Processing</option>
-            <option value="shipped">Shipped</option>
-            <option value="delivered">Delivered</option>
-            <option value="cancelled">Cancelled</option>
-          </select>
+        <div class="mt-4 flex justify-between items-center border-t pt-4">
+          <span class="text-gray-600">Total:</span>
+          <span class="text-xl font-semibold text-indigo-600">₱{{ order.total.toFixed(2) }}</span>
         </div>
       </div>
 
@@ -69,7 +63,7 @@
           </svg>
         </div>
         <h3 class="text-lg font-medium text-gray-900">No orders yet</h3>
-        <p class="mt-1 text-gray-500">Orders will appear here when customers make purchases</p>
+        <p class="mt-1 text-gray-500">Your orders will appear here after you make a purchase</p>
       </div>
     </div>
   </div>
@@ -85,7 +79,7 @@ const orderStore = useOrderStore();
 
 onMounted(() => {
   if (authStore.user) {
-    orderStore.subscribeToOrders(authStore.user.uid);
+    orderStore.subscribeToBuyerOrders(authStore.user.uid);
   }
 });
 
@@ -104,11 +98,14 @@ const getStatusClass = (status) => {
   return classes[status] || classes.pending;
 };
 
-const updateStatus = async (orderId, status) => {
+const cancelOrder = async (orderId) => {
+  if (!confirm('Are you sure you want to cancel this order?')) return;
+  
   try {
-    await orderStore.updateOrderStatus(orderId, status);
+    await orderStore.cancelOrder(orderId);
   } catch (error) {
-    console.error('Error updating order status:', error);
+    console.error('Error cancelling order:', error);
+    alert(error.message);
   }
 };
 </script>

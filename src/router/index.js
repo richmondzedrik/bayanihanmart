@@ -50,6 +50,24 @@ const routes = [
     name: 'profile',
     component: () => import('@/views/UserProfileView.vue'),
     meta: { requiresAuth: true }
+  },
+  {
+    path: '/seller/orders',
+    name: 'SellerOrders',
+    component: () => import('../views/seller/OrderDashboard.vue'),
+    meta: { requiresAuth: true, role: 'seller' }
+  },
+  {
+    path: '/buyer/cart',
+    name: 'Cart',
+    component: () => import('../views/buyer/CartView.vue'),
+    meta: { requiresAuth: true, role: 'buyer' }
+  },
+  {
+    path: '/buyer/orders',
+    name: 'BuyerOrders',
+    component: () => import('../views/buyer/OrdersView.vue'),
+    meta: { requiresAuth: true, role: 'buyer' }
   }
 ]
 

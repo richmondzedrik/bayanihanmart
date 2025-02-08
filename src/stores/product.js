@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia';
 import { ref } from 'vue';
 import { firestoreService } from '@/services/firebase/firestore';
-import { collection, getDocs, getDoc, doc, updateDoc } from 'firebase/firestore';
+import { collection, getDocs, getDoc, doc, updateDoc, query, onSnapshot } from 'firebase/firestore';
 import { db } from '@/services/firebase/config';
 import { useNotificationStore } from '@/stores/notification';
 
@@ -52,24 +52,27 @@ export const useProductStore = defineStore('product', () => {
     try {
       loading.value = true;
       error.value = null;
-      const querySnapshot = await getDocs(collection(db, 'products'));
-      const productsWithSellers = await Promise.all(
-        querySnapshot.docs.map(async (productDoc) => {
-          const product = { id: productDoc.id, ...productDoc.data() };
-          const sellerRef = doc(db, 'users', product.sellerId);
-          const sellerDoc = await getDoc(sellerRef);
-          return {
-            ...product,
-            seller: sellerDoc.exists() ? sellerDoc.data() : null
-          };
-        })
-      );
-      products.value = productsWithSellers;
+      
+      const q = query(collection(db, 'products'));
+      return onSnapshot(q, async (snapshot) => {
+        const productsWithSellers = await Promise.all(
+          snapshot.docs.map(async (productDoc) => {
+            const product = { id: productDoc.id, ...productDoc.data() };
+            const sellerRef = doc(db, 'users', product.sellerId);
+            const sellerDoc = await getDoc(sellerRef);
+            return {
+              ...product,
+              seller: sellerDoc.exists() ? sellerDoc.data() : null
+            };
+          })
+        );
+        products.value = productsWithSellers;
+        loading.value = false;
+      });
     } catch (e) {
       error.value = e.message;
-      throw e;
-    } finally {
       loading.value = false;
+      throw e;
     }
   };
 
@@ -133,6 +136,18 @@ export const useProductStore = defineStore('product', () => {
     }
   };
 
+  async function updateProductStock(productId, newStock) {
+    try {
+      const productRef = doc(db, 'products', productId);
+      await updateDoc(productRef, {
+        stock: newStock
+      });
+    } catch (error) {
+      console.error('Error updating product stock:', error);
+      throw error;
+    }
+  }
+
   return {
     products,
     loading,
@@ -143,6 +158,7 @@ export const useProductStore = defineStore('product', () => {
     updateProduct,
     getProductsBySeller,
     updateSellerDisasterStatus,
-    getAllProducts
+    getAllProducts,
+    updateProductStock
   };
 });

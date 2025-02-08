@@ -101,7 +101,8 @@ const uploadImage = async () => {
   try {
     const formData = new FormData();
     formData.append('file', imageFile.value);
-    formData.append('upload_preset', 'dmgivh17b'); // Get this from Cloudinary dashboard
+    formData.append('upload_preset', 'dmgivh17b');
+    formData.append('folder', 'bayanihanmart');
     
     const response = await fetch(
       `https://api.cloudinary.com/v1_1/dmgivh17b/image/upload`,
@@ -111,9 +112,12 @@ const uploadImage = async () => {
       }
     );
     
-    const data = await response.json();
-    if (data.error) throw new Error(data.error.message);
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error?.message || 'Upload failed');
+    }
     
+    const data = await response.json();
     return data.secure_url;
   } catch (error) {
     console.error('Error uploading image:', error);

@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia';
 import { ref } from 'vue';
-import { collection, query, where, onSnapshot, updateDoc, doc } from 'firebase/firestore';
+import { collection, query, where, onSnapshot, updateDoc, doc, orderBy, getDoc, writeBatch } from 'firebase/firestore';
 import { db } from '@/services/firebase/config';
 
 export const useOrderStore = defineStore('order', () => {
@@ -77,12 +77,103 @@ export const useOrderStore = defineStore('order', () => {
     }
   }
 
+  function subscribeToBuyerOrders(buyerId) {
+    if (!buyerId) return null;
+    
+    try {
+      loading.value = true;
+      error.value = null;
+
+      const q = query(
+        collection(db, 'orders'),
+        where('buyerId', '==', buyerId),
+        orderBy('createdAt', 'desc')
+      );
+
+      unsubscribe = onSnapshot(
+        q, 
+        (snapshot) => {
+          orders.value = snapshot.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data()
+          }));
+          loading.value = false;
+        },
+        (err) => {
+          console.error('Orders subscription error:', err);
+          error.value = 'Failed to load orders. Please try again.';
+          loading.value = false;
+        }
+      );
+
+      return unsubscribe;
+    } catch (e) {
+      console.error('Error setting up orders subscription:', e);
+      error.value = 'Failed to set up orders subscription';
+      loading.value = false;
+      return null;
+    }
+  }
+
+  async function cancelOrder(orderId) {
+    try {
+      loading.value = true;
+      error.value = null;
+      
+      // Get the order details first
+      const orderRef = doc(db, 'orders', orderId);
+      const orderSnap = await getDoc(orderRef);
+      
+      if (!orderSnap.exists()) {
+        throw new Error('Order not found');
+      }
+      
+      const orderData = orderSnap.data();
+      if (orderData.status !== 'pending') {
+        throw new Error('Only pending orders can be cancelled');
+      }
+      
+      // Create a batch for atomic operations
+      const batch = writeBatch(db);
+      
+      // Update order status to cancelled
+      batch.update(orderRef, {
+        status: 'cancelled',
+        updatedAt: new Date()
+      });
+      
+      // Restore product stock
+      for (const item of orderData.items) {
+        const productRef = doc(db, 'products', item.productId);
+        const productSnap = await getDoc(productRef);
+        
+        if (productSnap.exists()) {
+          const currentStock = productSnap.data().stock;
+          batch.update(productRef, {
+            stock: currentStock + item.quantity,
+            updatedAt: new Date()
+          });
+        }
+      }
+      
+      // Commit all changes atomically
+      await batch.commit();
+    } catch (e) {
+      error.value = e.message;
+      throw e;
+    } finally {
+      loading.value = false;
+    }
+  }
+
   return {
     orders,
     loading,
     error,
     subscribeToOrders,
+    subscribeToBuyerOrders,
     updateOrderStatus,
+    cancelOrder,
     cleanup
   };
 });

@@ -18,11 +18,16 @@ export const useCartStore = defineStore('cart', () => {
     const existingItem = items.value.find(item => item.productId === product.productId);
     
     if (existingItem) {
-      existingItem.quantity += 1;
+      const newQuantity = existingItem.quantity + product.quantity;
+      if (newQuantity <= product.stock) {
+        existingItem.quantity = newQuantity;
+      } else {
+        existingItem.quantity = product.stock;
+      }
     } else {
       items.value.push({
         ...product,
-        quantity: 1
+        quantity: Math.min(product.quantity, product.stock)
       });
     }
   }
@@ -37,9 +42,10 @@ export const useCartStore = defineStore('cart', () => {
   function updateQuantity(productId, quantity) {
     const item = items.value.find(item => item.productId === productId);
     if (item) {
-      item.quantity = Math.max(0, quantity);
-      if (item.quantity === 0) {
+      if (quantity <= 0) {
         removeItem(productId);
+      } else {
+        item.quantity = Math.min(Math.max(0, quantity), item.stock);
       }
     }
   }
